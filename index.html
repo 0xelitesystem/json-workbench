@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON Workbench</title>
+<meta name="description" content="Format, validate, explore, query, diff, and convert JSON in your browser. Tree view, JSONPath, structural diff, JSON to YAML, CSV, and TypeScript. Single file, no ads, no upload.">
+<link rel="canonical" href="https://0xelitesystem.github.io/json-workbench/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="JSON Workbench">
+<meta property="og:description" content="Format, validate, explore, query, diff, and convert JSON in your browser. No ads, no upload, single file.">
+<meta property="og:url" content="https://0xelitesystem.github.io/json-workbench/">
+<meta property="og:site_name" content="JSON Workbench">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JSON Workbench">
+<meta name="twitter:description" content="Format, validate, explore, query, diff, and convert JSON in your browser. No ads, no upload, single file.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230f5c60'/><text x='50' y='70' font-size='58' text-anchor='middle' fill='%23fafaf6' font-family='monospace'>{ }</text></svg>">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "JSON Workbench",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any (browser)",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "url": "https://0xelitesystem.github.io/json-workbench/",
+  "author": {
+    "@type": "Person",
+    "name": "0xelitesystem",
+    "url": "https://elitesystem.ai"
+  }
+}
+</script>
+<style>
+:root {
+  --bg: #fafaf6;
+  --surface: #ffffff;
+  --surface-2: #f4f1e9;
+  --ink: #0a1d1e;
+  --ink-soft: #2c4a4c;
+  --ink-faint: #5d7375;
+  --rule: #c8d4d3;
+  --teal: #0f5c60;
+  --teal-deep: #0a4548;
+  --gold: #b07d2a;
+  --gold-deep: #8a611f;
+  --ok: #1a5c2e;
+  --warn: #8a5a00;
+  --err: #8b1a1a;
+  --code-bg: #f0ebe1;
+  --t-string: #2660a8;
+  --t-number: #8a611f;
+  --t-bool: #b03d8f;
+  --t-null: #5d7375;
+  --t-key: #0a4548;
+  --add-bg: #e3f2e6;
+  --add-ink: #1a5c2e;
+  --del-bg: #f7e2e2;
+  --del-ink: #8b1a1a;
+  --chg-bg: #f6ecd6;
+  --chg-ink: #8a611f;
+}
+[data-theme="dark"] {
+  --bg: #0c1c1d;
+  --surface: #14292a;
+  --surface-2: #102021;
+  --ink: #e8ebe6;
+  --ink-soft: #b0c0bd;
+  --ink-faint: #7e9290;
+  --rule: #2a4042;
+  --teal: #4ab4ba;
+  --teal-deep: #6dc8ce;
+  --gold: #d4a155;
+  --gold-deep: #e6b876;
+  --ok: #6dd380;
+  --warn: #d4a155;
+  --err: #e88080;
+  --code-bg: #0a1718;
+  --t-string: #6da8e0;
+  --t-number: #d4a155;
+  --t-bool: #d97ab8;
+  --t-null: #7e9290;
+  --t-key: #6dc8ce;
+  --add-bg: #15331c;
+  --add-ink: #6dd380;
+  --del-bg: #3a1717;
+  --del-ink: #e88080;
+  --chg-bg: #332811;
+  --chg-ink: #d4a155;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  line-height: 1.55;
+}
+.wrap { max-width: 1180px; margin: 0 auto; }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 2px solid var(--teal);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--teal);
+}
+.tag {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--gold-deep);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+[data-theme="dark"] .tag { color: var(--gold); }
+.theme-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.theme-btn:hover { border-color: var(--teal); color: var(--teal); }
+.lede {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  margin-bottom: 1.5rem;
+  max-width: 70ch;
+}
+.privacy-note {
+  font-size: 0.78rem;
+  color: var(--gold-deep);
+  margin-bottom: 1.5rem;
+}
+[data-theme="dark"] .privacy-note { color: var(--gold); }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.tab {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-radius: 3px 3px 0 0;
+  position: relative;
+  bottom: -1px;
+}
+.tab:hover { color: var(--teal); }
+.tab.active {
+  color: var(--teal);
+  font-weight: 600;
+  border-color: var(--rule);
+  border-bottom: 1px solid var(--surface);
+  background: var(--surface);
+}
+.panel { display: none; }
+.panel.active { display: block; }
+
+label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+textarea, input[type="text"] {
+  width: 100%;
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  border-radius: 2px;
+}
+textarea {
+  min-height: 240px;
+  resize: vertical;
+  white-space: pre;
+  tab-size: 2;
+}
+textarea:focus, input[type="text"]:focus { outline: 2px solid var(--teal); outline-offset: 1px; }
+input[type="text"] { font-size: 0.9rem; }
+
+.controls {
+  display: flex;
+  gap: 0.6rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+  align-items: center;
+}
+button {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 2px;
+}
+button:hover { border-color: var(--teal); }
+button.primary {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--surface);
+  font-weight: 600;
+}
+[data-theme="dark"] button.primary { color: var(--bg) !important; }
+button.primary:hover { background: var(--teal-deep); border-color: var(--teal-deep); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button.copy {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.seg button {
+  border: none;
+  border-right: 1px solid var(--rule);
+  border-radius: 0;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.8rem;
+}
+.seg button:last-child { border-right: none; }
+.seg button.on {
+  background: var(--teal);
+  color: var(--surface);
+  font-weight: 600;
+}
+[data-theme="dark"] .seg button.on { color: var(--bg); }
+.seg-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  margin-right: 0.15rem;
+}
+
+.section {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 1.1rem;
+  margin-bottom: 1.25rem;
+  border-radius: 3px;
+}
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.section-title { font-size: 0.9rem; font-weight: 600; letter-spacing: 0.02em; }
+pre {
+  background: var(--code-bg);
+  padding: 0.85rem;
+  border-radius: 2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--ink);
+  tab-size: 2;
+}
+.muted { font-size: 0.85rem; color: var(--ink-soft); }
+.hint { font-size: 0.78rem; color: var(--ink-faint); margin-top: 0.4rem; }
+code.inline {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82em;
+  background: var(--code-bg);
+  padding: 0.05rem 0.35rem;
+  border-radius: 2px;
+}
+
+/* Status banners */
+.banner {
+  font-size: 0.85rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 2px;
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--rule);
+  background: var(--code-bg);
+}
+.banner.ok { border-left-color: var(--ok); color: var(--ok); }
+.banner.warn { border-left-color: var(--warn); color: var(--warn); }
+.banner.err { border-left-color: var(--err); color: var(--err); }
+.banner.info { border-left-color: var(--teal); color: var(--ink-soft); }
+.banner b { font-weight: 600; }
+
+/* Tree view */
+.tree {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  background: var(--code-bg);
+  padding: 0.85rem;
+  border-radius: 2px;
+  overflow-x: auto;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.tnode { white-space: nowrap; }
+.tchildren { margin-left: 1.15rem; border-left: 1px dotted var(--rule); padding-left: 0.6rem; }
+.ttoggle {
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  width: 1rem;
+  color: var(--teal);
+  font-weight: 600;
+  text-align: center;
+}
+.ttoggle.leaf { cursor: default; color: transparent; }
+.tkey { color: var(--t-key); }
+.tcolon { color: var(--ink-faint); }
+.tbadge {
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+  font-style: italic;
+  margin-left: 0.4rem;
+  font-family: ui-serif, Georgia, serif;
+}
+.v-string { color: var(--t-string); }
+.v-number { color: var(--t-number); }
+.v-boolean { color: var(--t-bool); }
+.v-null { color: var(--t-null); }
+.collapsed > .tchildren { display: none; }
+.collapsed > .tnode .summary-stub { display: inline; }
+.summary-stub { display: none; color: var(--ink-faint); }
+
+.tree-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+/* Diff */
+.diff-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.difflist {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.diffrow {
+  padding: 0.4rem 0.6rem;
+  border-radius: 2px;
+  margin-bottom: 0.3rem;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.diffrow.add { background: var(--add-bg); color: var(--add-ink); }
+.diffrow.del { background: var(--del-bg); color: var(--del-ink); }
+.diffrow.chg { background: var(--chg-bg); color: var(--chg-ink); }
+.diffrow .path { font-weight: 600; }
+.diff-summary { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 0.85rem; margin-bottom: 1rem; }
+.diff-summary span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.swatch { width: 0.7rem; height: 0.7rem; border-radius: 1px; display: inline-block; }
+.sw-add { background: var(--ok); }
+.sw-del { background: var(--err); }
+.sw-chg { background: var(--gold); }
+
+/* Query results */
+.qresult { margin-bottom: 0.6rem; }
+.qpath {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  margin-bottom: 0.15rem;
+}
+
+.io-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.error-mark {
+  background: var(--del-bg);
+  color: var(--del-ink);
+  border-radius: 2px;
+  padding: 0 1px;
+  outline: 1px solid var(--err);
+}
+
+footer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+footer a { color: var(--teal); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(2rem);
+  background: var(--teal);
+  color: #fff;
+  padding: 0.6rem 1.1rem;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  font-family: ui-monospace, monospace;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 50;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 760px) {
+  .diff-cols { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  body { padding: 1rem 0.75rem; }
+  h1 { font-size: 1.4rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>JSON Workbench</h1>
+    <div class="tag">Format, explore, query, diff, convert. In your browser.</div>
+  </div>
+  <button class="theme-btn" id="theme-toggle" type="button">Dark</button>
+</header>
+
+<p class="lede">A complete JSON toolkit that runs entirely on your machine. Pretty-print and validate with precise error locations, browse a collapsible tree, run JSONPath queries, compare two documents structurally, and convert to YAML, CSV, or a TypeScript interface.</p>
+<p class="privacy-note">Nothing is uploaded. Every byte you paste is processed locally in this page. Open DevTools and watch the network tab: no requests are made.</p>
+
+<div class="tabs" role="tablist">
+  <button class="tab active" data-tab="format" role="tab" type="button">Format &amp; validate</button>
+  <button class="tab" data-tab="tree" role="tab" type="button">Tree</button>
+  <button class="tab" data-tab="query" role="tab" type="button">Query</button>
+  <button class="tab" data-tab="diff" role="tab" type="button">Diff</button>
+  <button class="tab" data-tab="convert" role="tab" type="button">Convert</button>
+</div>
+
+<!-- FORMAT -->
+<section class="panel active" id="panel-format">
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Input</div>
+      <div class="controls" style="margin:0;">
+        <span class="seg-label">Indent</span>
+        <div class="seg" id="indent-seg">
+          <button type="button" data-indent="2" class="on">2</button>
+          <button type="button" data-indent="4">4</button>
+          <button type="button" data-indent="tab">Tab</button>
+        </div>
+      </div>
+    </div>
+    <textarea id="fmt-input" placeholder='Paste JSON here. Example: {"hello":"world","items":[1,2,3]}' spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+    <div class="controls">
+      <button class="primary" id="fmt-pretty" type="button">Pretty-print</button>
+      <button id="fmt-minify" type="button">Minify</button>
+      <button id="fmt-sample" type="button">Load sample</button>
+      <button id="fmt-clear" type="button">Clear</button>
+      <label style="display:inline-flex;align-items:center;gap:0.4rem;text-transform:none;letter-spacing:0;font-weight:400;margin:0;color:var(--ink-soft);cursor:pointer;">
+        <input type="checkbox" id="fmt-tolerant" style="width:auto;"> Tolerate trailing commas and comments
+      </label>
+    </div>
+    <div class="hint">Shortcut: Ctrl or Cmd + Enter to pretty-print.</div>
+  </div>
+  <div id="fmt-status"></div>
+  <div class="section" id="fmt-output-sec" style="display:none;">
+    <div class="section-head">
+      <div class="section-title" id="fmt-output-title">Output</div>
+      <button class="copy" id="fmt-copy" type="button">Copy</button>
+    </div>
+    <pre id="fmt-output"></pre>
+  </div>
+</section>
+
+<!-- TREE -->
+<section class="panel" id="panel-tree">
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Input</div>
+    </div>
+    <textarea id="tree-input" placeholder='Paste JSON to explore it as a tree.' spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+    <div class="controls">
+      <button class="primary" id="tree-build" type="button">Build tree</button>
+      <button id="tree-sample" type="button">Load sample</button>
+      <button id="tree-clear" type="button">Clear</button>
+    </div>
+  </div>
+  <div id="tree-status"></div>
+  <div class="section" id="tree-output-sec" style="display:none;">
+    <div class="section-head">
+      <div class="section-title">Tree</div>
+      <div class="tree-actions">
+        <button id="tree-expand" type="button">Expand all</button>
+        <button id="tree-collapse" type="button">Collapse all</button>
+      </div>
+    </div>
+    <div class="tree" id="tree-output"></div>
+  </div>
+</section>
+
+<!-- QUERY -->
+<section class="panel" id="panel-query">
+  <div class="section">
+    <div class="section-head"><div class="section-title">Input</div></div>
+    <textarea id="query-input" placeholder='Paste JSON, then enter a JSONPath below.' spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+    <div class="controls">
+      <button id="query-sample" type="button">Load sample</button>
+      <button id="query-clear" type="button">Clear</button>
+    </div>
+    <label for="query-path" style="margin-top:0.5rem;">JSONPath</label>
+    <input type="text" id="query-path" placeholder="$.store.book[*].title" spellcheck="false" autocapitalize="off" autocorrect="off" value="$">
+    <div class="hint">
+      Supported: <code class="inline">$</code> root, <code class="inline">.key</code>, <code class="inline">['key']</code>, <code class="inline">[0]</code>, <code class="inline">[*]</code>, <code class="inline">..key</code> recursive descent, slices <code class="inline">[1:3]</code>, unions <code class="inline">[0,2]</code>, and filters <code class="inline">[?(@.price&lt;10)]</code>. This is a useful JSONPath subset, not full jq.
+    </div>
+  </div>
+  <div id="query-status"></div>
+  <div class="section" id="query-output-sec" style="display:none;">
+    <div class="section-head">
+      <div class="section-title" id="query-count">Matches</div>
+      <button class="copy" id="query-copy" type="button">Copy results</button>
+    </div>
+    <div id="query-output"></div>
+  </div>
+</section>
+
+<!-- DIFF -->
+<section class="panel" id="panel-diff">
+  <div class="section">
+    <div class="diff-cols">
+      <div>
+        <label for="diff-a">Left (A)</label>
+        <textarea id="diff-a" placeholder='{"name":"alpha","version":1}' spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+      </div>
+      <div>
+        <label for="diff-b">Right (B)</label>
+        <textarea id="diff-b" placeholder='{"name":"alpha","version":2}' spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="diff-run" type="button">Compare</button>
+      <button id="diff-sample" type="button">Load sample</button>
+      <button id="diff-clear" type="button">Clear</button>
+    </div>
+    <div class="hint">Object keys are compared without regard to order. Arrays are compared by index.</div>
+  </div>
+  <div id="diff-status"></div>
+  <div class="section" id="diff-output-sec" style="display:none;">
+    <div class="section-head"><div class="section-title">Changes</div></div>
+    <div class="diff-summary" id="diff-summary"></div>
+    <div class="difflist" id="diff-output"></div>
+  </div>
+</section>
+
+<!-- CONVERT -->
+<section class="panel" id="panel-convert">
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Input</div>
+      <div class="controls" style="margin:0;">
+        <span class="seg-label">Target</span>
+        <div class="seg" id="conv-seg">
+          <button type="button" data-target="yaml" class="on">YAML</button>
+          <button type="button" data-target="csv">CSV</button>
+          <button type="button" data-target="ts">TypeScript</button>
+        </div>
+      </div>
+    </div>
+    <textarea id="conv-input" placeholder='Paste JSON to convert.' spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+    <div class="controls">
+      <button class="primary" id="conv-run" type="button">Convert</button>
+      <button id="conv-sample" type="button">Load sample</button>
+      <button id="conv-clear" type="button">Clear</button>
+    </div>
+  </div>
+  <div id="conv-status"></div>
+  <div class="section" id="conv-output-sec" style="display:none;">
+    <div class="section-head">
+      <div class="section-title" id="conv-output-title">Output</div>
+      <button class="copy" id="conv-copy" type="button">Copy</button>
+    </div>
+    <pre id="conv-output"></pre>
+  </div>
+</section>
+
+<footer>
+  <div>JSON Workbench. Open source, MIT licensed. <a href="https://github.com/0xelitesystem/json-workbench" target="_blank" rel="noopener">View source</a>.</div>
+  <div>Everything runs locally. No uploads.</div>
+</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+
+/* ---------- Theme ---------- */
+const themeBtn = $("theme-toggle");
+function setTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  themeBtn.textContent = t === "dark" ? "Light" : "Dark";
+}
+themeBtn.addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme") || "light";
+  setTheme(cur === "dark" ? "light" : "dark");
+});
+(function initTheme() {
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  setTheme(prefersDark ? "dark" : "light");
+})();
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll(".tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+    tab.classList.add("active");
+    $("panel-" + tab.dataset.tab).classList.add("active");
+  });
+});
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(msg) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 1600);
+}
+function copyText(text) {
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => toast("Copied"), () => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); toast("Copied"); } catch (e) { toast("Copy failed"); }
+  document.body.removeChild(ta);
+}
+
+/* ---------- Banners ---------- */
+function banner(targetId, kind, html) {
+  $(targetId).innerHTML = '<div class="banner ' + kind + '">' + html + '</div>';
+}
+function clearBanner(targetId) { $(targetId).innerHTML = ""; }
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/* ---------- Tolerant parse (strip comments + trailing commas) ---------- */
+/* Returns {value, fixed:boolean} or throws. Only strips inside non-string regions. */
+function stripTolerant(src) {
+  let out = "";
+  let i = 0, n = src.length;
+  let inStr = false, strCh = "", esc2 = false;
+  let removedComment = false, removedComma = false;
+  while (i < n) {
+    const c = src[i];
+    if (inStr) {
+      out += c;
+      if (esc2) { esc2 = false; }
+      else if (c === "\\") { esc2 = true; }
+      else if (c === strCh) { inStr = false; }
+      i++;
+      continue;
+    }
+    if (c === '"' || c === "'") { inStr = true; strCh = c; out += c; i++; continue; }
+    // line comment
+    if (c === "/" && src[i + 1] === "/") {
+      removedComment = true;
+      i += 2;
+      while (i < n && src[i] !== "\n") i++;
+      continue;
+    }
+    // block comment
+    if (c === "/" && src[i + 1] === "*") {
+      removedComment = true;
+      i += 2;
+      while (i < n && !(src[i] === "*" && src[i + 1] === "/")) i++;
+      i += 2;
+      continue;
+    }
+    // trailing comma: a comma followed (after whitespace) by } or ]
+    if (c === ",") {
+      let j = i + 1;
+      while (j < n && /\s/.test(src[j])) j++;
+      if (src[j] === "}" || src[j] === "]") {
+        removedComma = true;
+        i++;
+        continue;
+      }
+    }
+    out += c;
+    i++;
+  }
+  return { text: out, fixed: removedComment || removedComma };
+}
+
+/* Locate line/col of a JSON.parse error by position when available. */
+function errorLocation(src, err) {
+  const msg = err.message || "";
+  let pos = -1;
+  const m = msg.match(/position (\d+)/i);
+  if (m) pos = parseInt(m[1], 10);
+  if (pos < 0) {
+    // Firefox style: "line X column Y"
+    const lm = msg.match(/line (\d+) column (\d+)/i);
+    if (lm) return { line: parseInt(lm[1], 10), col: parseInt(lm[2], 10), pos: -1 };
+  }
+  if (pos < 0) return null;
+  let line = 1, col = 1;
+  for (let i = 0; i < pos && i < src.length; i++) {
+    if (src[i] === "\n") { line++; col = 1; } else col++;
+  }
+  return { line, col, pos };
+}
+
+/* Parse with optional tolerance. Returns {value, fixed}. Throws Error with .loc on failure. */
+function parseJSON(raw, tolerant) {
+  let text = raw, fixed = false;
+  if (tolerant) {
+    const r = stripTolerant(raw);
+    text = r.text;
+    fixed = r.fixed;
+  }
+  try {
+    return { value: JSON.parse(text), fixed };
+  } catch (e) {
+    const loc = errorLocation(text, e);
+    const err = new Error(e.message);
+    err.loc = loc;
+    err.cleanedText = text;
+    throw err;
+  }
+}
+
+/* Build an HTML snippet highlighting the error position. */
+function errorSnippet(src, loc) {
+  if (!loc || loc.pos < 0) {
+    if (loc && loc.line) {
+      const lines = src.split("\n");
+      const ln = lines[loc.line - 1] || "";
+      const before = esc(ln.slice(0, loc.col - 1));
+      const at = esc(ln.slice(loc.col - 1, loc.col) || " ");
+      const after = esc(ln.slice(loc.col));
+      return before + '<span class="error-mark">' + at + "</span>" + after;
+    }
+    return "";
+  }
+  const start = Math.max(0, loc.pos - 40);
+  const end = Math.min(src.length, loc.pos + 40);
+  const before = esc(src.slice(start, loc.pos));
+  const at = esc(src.slice(loc.pos, loc.pos + 1) || " ");
+  const after = esc(src.slice(loc.pos + 1, end));
+  return (start > 0 ? "..." : "") + before + '<span class="error-mark">' + at + "</span>" + after + (end < src.length ? "..." : "");
+}
+
+function showParseError(statusId, raw, err) {
+  let where = "";
+  if (err.loc && err.loc.line) {
+    where = " at line " + err.loc.line + ", column " + err.loc.col;
+  }
+  const snip = errorSnippet(err.cleanedText || raw, err.loc);
+  let html = "<b>Invalid JSON" + where + ".</b> " + esc(err.message);
+  if (snip) html += '<div style="margin-top:0.5rem;font-family:ui-monospace,monospace;font-size:0.78rem;white-space:pre-wrap;word-break:break-all;">' + snip + "</div>";
+  banner(statusId, "err", html);
+}
+
+/* ---------- Indent helper ---------- */
+function indentValue(seg) {
+  const on = seg.querySelector("button.on");
+  const v = on.dataset.indent;
+  return v === "tab" ? "\t" : parseInt(v, 10);
+}
+
+/* ====================================================================
+   FORMAT & VALIDATE
+   ==================================================================== */
+const indentSeg = $("indent-seg");
+indentSeg.querySelectorAll("button").forEach((b) => {
+  b.addEventListener("click", () => {
+    indentSeg.querySelectorAll("button").forEach((x) => x.classList.remove("on"));
+    b.classList.add("on");
+  });
+});
+
+function runFormat(minify) {
+  const raw = $("fmt-input").value;
+  clearBanner("fmt-status");
+  $("fmt-output-sec").style.display = "none";
+  if (!raw.trim()) { banner("fmt-status", "info", "Paste some JSON above to format it."); return; }
+  let parsed;
+  try {
+    parsed = parseJSON(raw, $("fmt-tolerant").checked);
+  } catch (e) {
+    showParseError("fmt-status", raw, e);
+    return;
+  }
+  let out;
+  if (minify) {
+    out = JSON.stringify(parsed.value);
+    $("fmt-output-title").textContent = "Minified (" + out.length + " bytes)";
+  } else {
+    out = JSON.stringify(parsed.value, null, indentValue(indentSeg));
+    $("fmt-output-title").textContent = "Pretty-printed";
+  }
+  $("fmt-output").textContent = out;
+  $("fmt-output-sec").style.display = "block";
+  if (parsed.fixed) {
+    banner("fmt-status", "warn", "<b>Valid after cleanup.</b> Trailing commas and/or comments were removed before parsing. The output is strict JSON.");
+  } else {
+    banner("fmt-status", "ok", "<b>Valid JSON.</b>");
+  }
+}
+$("fmt-pretty").addEventListener("click", () => runFormat(false));
+$("fmt-minify").addEventListener("click", () => runFormat(true));
+$("fmt-copy").addEventListener("click", () => copyText($("fmt-output").textContent));
+$("fmt-clear").addEventListener("click", () => {
+  $("fmt-input").value = ""; clearBanner("fmt-status"); $("fmt-output-sec").style.display = "none";
+});
+$("fmt-input").addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); runFormat(false); }
+});
+
+/* ====================================================================
+   TREE VIEW (lazy, capped)
+   ==================================================================== */
+const TREE_NODE_CAP = 5000;
+let treeNodeCount = 0;
+let treeCapped = false;
+
+function typeOf(v) {
+  if (v === null) return "null";
+  if (Array.isArray(v)) return "array";
+  return typeof v; // object, string, number, boolean
+}
+
+function buildTreeDOM(value, keyLabel, isLast, depth) {
+  const node = document.createElement("div");
+  node.className = "tnode-wrap";
+  const line = document.createElement("div");
+  line.className = "tnode";
+
+  const t = typeOf(value);
+  const toggle = document.createElement("span");
+  toggle.className = "ttoggle";
+
+  const isContainer = t === "object" || t === "array";
+
+  if (keyLabel !== null) {
+    const k = document.createElement("span");
+    k.className = "tkey";
+    k.textContent = JSON.stringify(keyLabel);
+    const colon = document.createElement("span");
+    colon.className = "tcolon";
+    colon.textContent = ": ";
+    line.appendChild(toggle);
+    line.appendChild(k);
+    line.appendChild(colon);
+  } else {
+    line.appendChild(toggle);
+  }
+
+  if (isContainer) {
+    const entries = t === "array" ? value.map((v, i) => [i, v]) : Object.entries(value);
+    const count = entries.length;
+    const open = document.createElement("span");
+    open.textContent = t === "array" ? "[" : "{";
+    line.appendChild(open);
+
+    const badge = document.createElement("span");
+    badge.className = "tbadge";
+    badge.textContent = t === "array" ? count + (count === 1 ? " item" : " items") : count + (count === 1 ? " key" : " keys");
+    line.appendChild(badge);
+
+    const stub = document.createElement("span");
+    stub.className = "summary-stub";
+    stub.textContent = " ... " + (t === "array" ? "]" : "}");
+    line.appendChild(stub);
+
+    node.appendChild(line);
+
+    const children = document.createElement("div");
+    children.className = "tchildren";
+
+    let built = 0;
+    for (let idx = 0; idx < entries.length; idx++) {
+      if (treeNodeCount >= TREE_NODE_CAP) { treeCapped = true; break; }
+      treeNodeCount++;
+      const [ck, cv] = entries[idx];
+      children.appendChild(buildTreeDOM(cv, t === "array" ? null : ck, idx === entries.length - 1, depth + 1));
+      built++;
+    }
+    if (treeCapped && built < entries.length) {
+      const more = document.createElement("div");
+      more.className = "tnode";
+      more.style.color = "var(--warn)";
+      more.textContent = "... " + (entries.length - built) + " more (capped for performance, use Query or Format to inspect)";
+      children.appendChild(more);
+    }
+    const close = document.createElement("div");
+    close.className = "tnode";
+    close.textContent = t === "array" ? "]" : "}";
+    children.appendChild(close);
+
+    node.appendChild(children);
+
+    toggle.textContent = "-";
+    toggle.addEventListener("click", () => {
+      const collapsed = node.classList.toggle("collapsed");
+      toggle.textContent = collapsed ? "+" : "-";
+    });
+    // Auto-collapse deep nodes to stay responsive
+    if (depth >= 1 && count > 0) {
+      node.classList.add("collapsed");
+      toggle.textContent = "+";
+    }
+  } else {
+    toggle.classList.add("leaf");
+    const val = document.createElement("span");
+    val.className = "v-" + t;
+    if (t === "string") val.textContent = JSON.stringify(value);
+    else val.textContent = String(value);
+    line.appendChild(val);
+    node.appendChild(line);
+  }
+  return node;
+}
+
+function runTree() {
+  const raw = $("tree-input").value;
+  clearBanner("tree-status");
+  $("tree-output-sec").style.display = "none";
+  if (!raw.trim()) { banner("tree-status", "info", "Paste some JSON above to build the tree."); return; }
+  let parsed;
+  try { parsed = parseJSON(raw, true); }
+  catch (e) { showParseError("tree-status", raw, e); return; }
+
+  treeNodeCount = 0;
+  treeCapped = false;
+  const container = $("tree-output");
+  container.textContent = "";
+  treeNodeCount++;
+  const dom = buildTreeDOM(parsed.value, null, true, 0);
+  container.appendChild(dom);
+  $("tree-output-sec").style.display = "block";
+  if (treeCapped) {
+    banner("tree-status", "warn", "<b>Large document.</b> Rendered the first " + TREE_NODE_CAP + " nodes and capped the rest to keep the tab responsive. Use the Query tab for targeted lookups.");
+  } else {
+    banner("tree-status", "ok", "<b>Parsed.</b> " + treeNodeCount + " node" + (treeNodeCount === 1 ? "" : "s") + " rendered.");
+  }
+}
+function setAllCollapsed(state) {
+  document.querySelectorAll("#tree-output .tnode-wrap").forEach((n) => {
+    const toggle = n.querySelector(":scope > .tnode > .ttoggle");
+    if (!toggle || toggle.classList.contains("leaf")) return;
+    if (state) { n.classList.add("collapsed"); toggle.textContent = "+"; }
+    else { n.classList.remove("collapsed"); toggle.textContent = "-"; }
+  });
+}
+$("tree-build").addEventListener("click", runTree);
+$("tree-expand").addEventListener("click", () => setAllCollapsed(false));
+$("tree-collapse").addEventListener("click", () => setAllCollapsed(true));
+$("tree-clear").addEventListener("click", () => {
+  $("tree-input").value = ""; clearBanner("tree-status"); $("tree-output-sec").style.display = "none";
+});
+
+/* ====================================================================
+   JSONPATH ENGINE (useful subset)
+   Tokens supported:
+     $                      root
+     .key  /  ['key']  /  ["key"]
+     [n]   index           [*]  wildcard
+     [a:b] / [a:b:c]       slice (object members not sliced)
+     [a,b] union of indices/keys
+     ..key  / ..[*] / ..   recursive descent
+     [?(@.x OP value)]     filter; OP in == != < <= > >= ; also @.x exists
+   Returns array of {path, value}.
+   ==================================================================== */
+function jsonPathQuery(root, path) {
+  const tokens = tokenizePath(path);
+  // Each "context" carries value + path string
+  let ctx = [{ value: root, path: "$" }];
+  for (const tok of tokens) {
+    const next = [];
+    for (const c of ctx) {
+      applyToken(c, tok, next);
+    }
+    ctx = next;
+  }
+  return ctx;
+}
+
+function tokenizePath(path) {
+  let p = path.trim();
+  if (p === "") throw new Error("Empty path. Use $ for the whole document.");
+  if (p[0] === "$") p = p.slice(1);
+  const tokens = [];
+  let i = 0;
+  const n = p.length;
+  while (i < n) {
+    const c = p[i];
+    if (c === ".") {
+      if (p[i + 1] === ".") {
+        // recursive descent
+        i += 2;
+        // optional name or bracket follows; emit descend then the selector
+        if (p[i] === "[") {
+          tokens.push({ type: "descend" });
+          continue;
+        }
+        // read a name
+        let name = "";
+        while (i < n && /[A-Za-z0-9_\-$]/.test(p[i])) { name += p[i]; i++; }
+        if (name === "*") { tokens.push({ type: "descend" }, { type: "wildcard" }); }
+        else if (name === "") { tokens.push({ type: "descend" }); }
+        else { tokens.push({ type: "descend" }, { type: "key", key: name }); }
+        continue;
+      }
+      i++;
+      let name = "";
+      while (i < n && /[A-Za-z0-9_\-$]/.test(p[i])) { name += p[i]; i++; }
+      if (name === "*") tokens.push({ type: "wildcard" });
+      else if (name === "") throw new Error("Expected a key after '.'");
+      else tokens.push({ type: "key", key: name });
+      continue;
+    }
+    if (c === "[") {
+      const close = findBracketClose(p, i);
+      if (close < 0) throw new Error("Unclosed '[' in path.");
+      const inner = p.slice(i + 1, close).trim();
+      tokens.push(parseBracket(inner));
+      i = close + 1;
+      continue;
+    }
+    if (/\s/.test(c)) { i++; continue; }
+    // bare word right after $ (e.g. "store" without dot) - tolerate
+    if (/[A-Za-z0-9_\-$]/.test(c)) {
+      let name = "";
+      while (i < n && /[A-Za-z0-9_\-$]/.test(p[i])) { name += p[i]; i++; }
+      tokens.push({ type: "key", key: name });
+      continue;
+    }
+    throw new Error("Unexpected character '" + c + "' in path.");
+  }
+  return tokens;
+}
+
+function findBracketClose(p, open) {
+  let depth = 0, inStr = false, ch = "";
+  for (let i = open; i < p.length; i++) {
+    const c = p[i];
+    if (inStr) { if (c === ch && p[i - 1] !== "\\") inStr = false; continue; }
+    if (c === "'" || c === '"') { inStr = true; ch = c; continue; }
+    if (c === "[") depth++;
+    else if (c === "]") { depth--; if (depth === 0) return i; }
+  }
+  return -1;
+}
+
+function parseBracket(inner) {
+  if (inner === "*") return { type: "wildcard" };
+  // filter
+  if (inner[0] === "?") {
+    let expr = inner.slice(1).trim();
+    if (expr[0] === "(" && expr[expr.length - 1] === ")") expr = expr.slice(1, -1).trim();
+    return { type: "filter", expr: parseFilter(expr) };
+  }
+  // quoted key
+  if ((inner[0] === "'" && inner[inner.length - 1] === "'") || (inner[0] === '"' && inner[inner.length - 1] === '"')) {
+    return { type: "key", key: inner.slice(1, -1) };
+  }
+  // union (commas) - could be indices or quoted keys
+  if (inner.indexOf(",") >= 0 && inner.indexOf(":") < 0) {
+    const parts = splitTop(inner, ",");
+    const items = parts.map((s) => {
+      s = s.trim();
+      if ((s[0] === "'" && s[s.length - 1] === "'") || (s[0] === '"' && s[s.length - 1] === '"')) return { key: s.slice(1, -1) };
+      return { index: parseInt(s, 10) };
+    });
+    return { type: "union", items };
+  }
+  // slice
+  if (inner.indexOf(":") >= 0) {
+    const parts = inner.split(":");
+    const num = (x) => { x = x.trim(); return x === "" ? null : parseInt(x, 10); };
+    return { type: "slice", start: num(parts[0]), end: num(parts[1]), step: parts.length > 2 ? num(parts[2]) : null };
+  }
+  // single index
+  if (/^-?\d+$/.test(inner)) return { type: "index", index: parseInt(inner, 10) };
+  // bare key inside brackets
+  return { type: "key", key: inner };
+}
+
+function splitTop(s, sep) {
+  const out = [];
+  let depth = 0, inStr = false, ch = "", cur = "";
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inStr) { cur += c; if (c === ch && s[i - 1] !== "\\") inStr = false; continue; }
+    if (c === "'" || c === '"') { inStr = true; ch = c; cur += c; continue; }
+    if (c === "[" || c === "(") depth++;
+    else if (c === "]" || c === ")") depth--;
+    if (c === sep && depth === 0) { out.push(cur); cur = ""; continue; }
+    cur += c;
+  }
+  out.push(cur);
+  return out;
+}
+
+function parseFilter(expr) {
+  // supports: @.field OP value  | @['field'] OP value | @.field (existence)
+  const ops = ["==", "!=", "<=", ">=", "<", ">"];
+  let op = null, idx = -1;
+  for (const o of ops) {
+    const k = expr.indexOf(o);
+    if (k >= 0) { op = o; idx = k; break; }
+  }
+  if (op === null) {
+    return { lhs: parseFilterRef(expr.trim()), op: "exists", rhs: null };
+  }
+  const lhs = expr.slice(0, idx).trim();
+  let rhsRaw = expr.slice(idx + op.length).trim();
+  let rhs;
+  if ((rhsRaw[0] === "'" && rhsRaw[rhsRaw.length - 1] === "'") || (rhsRaw[0] === '"' && rhsRaw[rhsRaw.length - 1] === '"')) {
+    rhs = rhsRaw.slice(1, -1);
+  } else if (rhsRaw === "true") rhs = true;
+  else if (rhsRaw === "false") rhs = false;
+  else if (rhsRaw === "null") rhs = null;
+  else if (/^-?\d+(\.\d+)?$/.test(rhsRaw)) rhs = parseFloat(rhsRaw);
+  else rhs = rhsRaw;
+  return { lhs: parseFilterRef(lhs), op, rhs };
+}
+
+function parseFilterRef(ref) {
+  // @.a.b  or @['a']['b']  or @  -> array of keys
+  ref = ref.trim();
+  if (ref[0] !== "@") throw new Error("Filter must reference @ (current item).");
+  ref = ref.slice(1);
+  const keys = [];
+  let i = 0;
+  while (i < ref.length) {
+    if (ref[i] === ".") {
+      i++;
+      let name = "";
+      while (i < ref.length && /[A-Za-z0-9_\-$]/.test(ref[i])) { name += ref[i]; i++; }
+      keys.push(name);
+    } else if (ref[i] === "[") {
+      const close = ref.indexOf("]", i);
+      let inner = ref.slice(i + 1, close).trim();
+      if ((inner[0] === "'" && inner[inner.length - 1] === "'") || (inner[0] === '"' && inner[inner.length - 1] === '"')) inner = inner.slice(1, -1);
+      keys.push(inner);
+      i = close + 1;
+    } else { i++; }
+  }
+  return keys;
+}
+
+function refValue(item, keys) {
+  let v = item;
+  for (const k of keys) {
+    if (v == null) return undefined;
+    v = v[k];
+  }
+  return v;
+}
+
+function evalFilter(item, filter) {
+  const lv = refValue(item, filter.lhs);
+  if (filter.op === "exists") return lv !== undefined;
+  if (lv === undefined) return false;
+  switch (filter.op) {
+    case "==": return lv === filter.rhs;
+    case "!=": return lv !== filter.rhs;
+    case "<": return lv < filter.rhs;
+    case "<=": return lv <= filter.rhs;
+    case ">": return lv > filter.rhs;
+    case ">=": return lv >= filter.rhs;
+  }
+  return false;
+}
+
+function pathSeg(key) {
+  if (typeof key === "number") return "[" + key + "]";
+  if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key)) return "." + key;
+  return "['" + String(key).replace(/'/g, "\\'") + "']";
+}
+
+function applyToken(c, tok, out) {
+  const v = c.value;
+  switch (tok.type) {
+    case "key":
+      if (v && typeof v === "object" && !Array.isArray(v) && Object.prototype.hasOwnProperty.call(v, tok.key)) {
+        out.push({ value: v[tok.key], path: c.path + pathSeg(tok.key) });
+      } else if (Array.isArray(v) && /^\d+$/.test(tok.key)) {
+        const idx = parseInt(tok.key, 10);
+        if (idx < v.length) out.push({ value: v[idx], path: c.path + "[" + idx + "]" });
+      }
+      break;
+    case "index": {
+      if (Array.isArray(v)) {
+        let idx = tok.index;
+        if (idx < 0) idx += v.length;
+        if (idx >= 0 && idx < v.length) out.push({ value: v[idx], path: c.path + "[" + idx + "]" });
+      }
+      break;
+    }
+    case "wildcard":
+      if (Array.isArray(v)) v.forEach((x, i) => out.push({ value: x, path: c.path + "[" + i + "]" }));
+      else if (v && typeof v === "object") Object.keys(v).forEach((k) => out.push({ value: v[k], path: c.path + pathSeg(k) }));
+      break;
+    case "slice": {
+      if (Array.isArray(v)) {
+        const len = v.length;
+        let start = tok.start === null ? 0 : (tok.start < 0 ? Math.max(0, len + tok.start) : Math.min(tok.start, len));
+        let end = tok.end === null ? len : (tok.end < 0 ? Math.max(0, len + tok.end) : Math.min(tok.end, len));
+        const step = tok.step === null || tok.step === 0 ? 1 : tok.step;
+        if (step > 0) {
+          for (let i = start; i < end; i += step) out.push({ value: v[i], path: c.path + "[" + i + "]" });
+        } else {
+          const s = tok.start === null ? len - 1 : tok.start;
+          const e = tok.end === null ? -1 : tok.end;
+          for (let i = s; i > e; i += step) if (i >= 0 && i < len) out.push({ value: v[i], path: c.path + "[" + i + "]" });
+        }
+      }
+      break;
+    }
+    case "union":
+      for (const it of tok.items) {
+        if ("index" in it && Array.isArray(v)) {
+          let idx = it.index; if (idx < 0) idx += v.length;
+          if (idx >= 0 && idx < v.length) out.push({ value: v[idx], path: c.path + "[" + idx + "]" });
+        } else if ("key" in it && v && typeof v === "object" && !Array.isArray(v) && Object.prototype.hasOwnProperty.call(v, it.key)) {
+          out.push({ value: v[it.key], path: c.path + pathSeg(it.key) });
+        }
+      }
+      break;
+    case "filter":
+      if (Array.isArray(v)) {
+        v.forEach((x, i) => { if (evalFilter(x, tok.expr)) out.push({ value: x, path: c.path + "[" + i + "]" }); });
+      } else if (v && typeof v === "object") {
+        Object.keys(v).forEach((k) => { if (evalFilter(v[k], tok.expr)) out.push({ value: v[k], path: c.path + pathSeg(k) }); });
+      }
+      break;
+    case "descend": {
+      // emit current node and all descendants
+      const visit = (val, path) => {
+        out.push({ value: val, path });
+        if (Array.isArray(val)) val.forEach((x, i) => visit(x, path + "[" + i + "]"));
+        else if (val && typeof val === "object") Object.keys(val).forEach((k) => visit(val[k], path + pathSeg(k)));
+      };
+      // For recursive descent we want descendants (and self) so subsequent token can select
+      visit(v, c.path);
+      break;
+    }
+  }
+}
+
+function runQuery() {
+  const raw = $("query-input").value;
+  const path = $("query-path").value;
+  clearBanner("query-status");
+  $("query-output-sec").style.display = "none";
+  if (!raw.trim()) { banner("query-status", "info", "Paste some JSON above, then enter a path."); return; }
+  let parsed;
+  try { parsed = parseJSON(raw, true); }
+  catch (e) { showParseError("query-status", raw, e); return; }
+  if (!path.trim()) { banner("query-status", "info", "Enter a JSONPath, for example $ or $..name"); return; }
+
+  let results;
+  try {
+    results = jsonPathQuery(parsed.value, path);
+  } catch (e) {
+    banner("query-status", "err", "<b>Path error.</b> " + esc(e.message));
+    return;
+  }
+
+  // Deduplicate by path (recursive descent can revisit)
+  const seen = new Set();
+  const unique = [];
+  for (const r of results) {
+    if (!seen.has(r.path)) { seen.add(r.path); unique.push(r); }
+  }
+
+  const outEl = $("query-output");
+  outEl.textContent = "";
+  if (unique.length === 0) {
+    banner("query-status", "warn", "<b>No matches.</b> The path is valid but selected nothing in this document.");
+    return;
+  }
+  const cap = 500;
+  unique.slice(0, cap).forEach((r) => {
+    const wrap = document.createElement("div");
+    wrap.className = "qresult";
+    const p = document.createElement("div");
+    p.className = "qpath";
+    p.textContent = r.path;
+    const pre = document.createElement("pre");
+    pre.textContent = JSON.stringify(r.value, null, 2);
+    wrap.appendChild(p);
+    wrap.appendChild(pre);
+    outEl.appendChild(wrap);
+  });
+  $("query-count").textContent = unique.length + " match" + (unique.length === 1 ? "" : "es") + (unique.length > cap ? " (showing first " + cap + ")" : "");
+  $("query-output-sec").style.display = "block";
+  banner("query-status", "ok", "<b>" + unique.length + " match" + (unique.length === 1 ? "" : "es") + ".</b>");
+}
+function queryResultsJSON() {
+  const raw = $("query-input").value, path = $("query-path").value;
+  try {
+    const parsed = parseJSON(raw, true);
+    const results = jsonPathQuery(parsed.value, path);
+    const seen = new Set(); const vals = [];
+    for (const r of results) { if (!seen.has(r.path)) { seen.add(r.path); vals.push(r.value); } }
+    return JSON.stringify(vals, null, 2);
+  } catch (e) { return ""; }
+}
+$("query-copy").addEventListener("click", () => copyText(queryResultsJSON()));
+let queryDebounce;
+function scheduleQuery() { clearTimeout(queryDebounce); queryDebounce = setTimeout(runQuery, 200); }
+$("query-input").addEventListener("input", scheduleQuery);
+$("query-path").addEventListener("input", scheduleQuery);
+$("query-clear").addEventListener("click", () => {
+  $("query-input").value = ""; $("query-path").value = "$"; clearBanner("query-status"); $("query-output-sec").style.display = "none";
+});
+
+/* ====================================================================
+   STRUCTURAL DIFF (order-insensitive object keys, index-based arrays)
+   ==================================================================== */
+function deepEqual(a, b) {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (a === null || b === null) return a === b;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (typeof a !== "object") return a === b;
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) if (!deepEqual(a[i], b[i])) return false;
+    return true;
+  }
+  const ka = Object.keys(a), kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  for (const k of ka) {
+    if (!Object.prototype.hasOwnProperty.call(b, k)) return false;
+    if (!deepEqual(a[k], b[k])) return false;
+  }
+  return true;
+}
+
+function diffNodes(a, b, path, changes) {
+  const ta = typeOf(a), tb = typeOf(b);
+  if (ta !== tb) {
+    changes.push({ kind: "chg", path, from: a, to: b });
+    return;
+  }
+  if (ta === "object") {
+    const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+    // sort for stable, readable output
+    [...keys].sort().forEach((k) => {
+      const inA = Object.prototype.hasOwnProperty.call(a, k);
+      const inB = Object.prototype.hasOwnProperty.call(b, k);
+      const childPath = path + pathSeg(k);
+      if (inA && !inB) changes.push({ kind: "del", path: childPath, from: a[k] });
+      else if (!inA && inB) changes.push({ kind: "add", path: childPath, to: b[k] });
+      else diffNodes(a[k], b[k], childPath, changes);
+    });
+  } else if (ta === "array") {
+    const max = Math.max(a.length, b.length);
+    for (let i = 0; i < max; i++) {
+      const childPath = path + "[" + i + "]";
+      if (i >= a.length) changes.push({ kind: "add", path: childPath, to: b[i] });
+      else if (i >= b.length) changes.push({ kind: "del", path: childPath, from: a[i] });
+      else diffNodes(a[i], b[i], childPath, changes);
+    }
+  } else {
+    if (!deepEqual(a, b)) changes.push({ kind: "chg", path, from: a, to: b });
+  }
+}
+
+function fmtVal(v) {
+  if (v === undefined) return "undefined";
+  return JSON.stringify(v);
+}
+
+function runDiff() {
+  clearBanner("diff-status");
+  $("diff-output-sec").style.display = "none";
+  const rawA = $("diff-a").value, rawB = $("diff-b").value;
+  if (!rawA.trim() || !rawB.trim()) { banner("diff-status", "info", "Paste JSON into both sides to compare."); return; }
+  let A, B;
+  try { A = parseJSON(rawA, true).value; }
+  catch (e) { banner("diff-status", "err", "<b>Left side invalid.</b> " + esc(e.message)); return; }
+  try { B = parseJSON(rawB, true).value; }
+  catch (e) { banner("diff-status", "err", "<b>Right side invalid.</b> " + esc(e.message)); return; }
+
+  const changes = [];
+  diffNodes(A, B, "$", changes);
+
+  const counts = { add: 0, del: 0, chg: 0 };
+  changes.forEach((c) => counts[c.kind]++);
+
+  $("diff-summary").innerHTML =
+    '<span><span class="swatch sw-add"></span>' + counts.add + " added</span>" +
+    '<span><span class="swatch sw-del"></span>' + counts.del + " removed</span>" +
+    '<span><span class="swatch sw-chg"></span>' + counts.chg + " changed</span>";
+
+  const out = $("diff-output");
+  out.textContent = "";
+  if (changes.length === 0) {
+    banner("diff-status", "ok", "<b>Identical.</b> The two documents are structurally equal.");
+    $("diff-output-sec").style.display = "block";
+    return;
+  }
+  changes.forEach((c) => {
+    const row = document.createElement("div");
+    row.className = "diffrow " + c.kind;
+    if (c.kind === "add") row.textContent = "+ " + c.path + " = " + fmtVal(c.to);
+    else if (c.kind === "del") row.textContent = "- " + c.path + " = " + fmtVal(c.from);
+    else row.textContent = "~ " + c.path + ": " + fmtVal(c.from) + "  ->  " + fmtVal(c.to);
+    out.appendChild(row);
+  });
+  $("diff-output-sec").style.display = "block";
+  banner("diff-status", "ok", "<b>" + changes.length + " difference" + (changes.length === 1 ? "" : "s") + ".</b>");
+}
+$("diff-run").addEventListener("click", runDiff);
+$("diff-clear").addEventListener("click", () => {
+  $("diff-a").value = ""; $("diff-b").value = ""; clearBanner("diff-status"); $("diff-output-sec").style.display = "none";
+});
+
+/* ====================================================================
+   CONVERTERS: YAML, CSV, TypeScript
+   ==================================================================== */
+const convSeg = $("conv-seg");
+convSeg.querySelectorAll("button").forEach((b) => {
+  b.addEventListener("click", () => {
+    convSeg.querySelectorAll("button").forEach((x) => x.classList.remove("on"));
+    b.classList.add("on");
+  });
+});
+function convTarget() { return convSeg.querySelector("button.on").dataset.target; }
+
+/* --- YAML --- */
+function toYAML(value, indent) {
+  indent = indent || 0;
+  const pad = "  ".repeat(indent);
+  const t = typeOf(value);
+  if (t === "object") {
+    const keys = Object.keys(value);
+    if (keys.length === 0) return pad + "{}";
+    return keys.map((k) => {
+      const kk = yamlKey(k);
+      const v = value[k];
+      const vt = typeOf(v);
+      if (vt === "object" && Object.keys(v).length > 0) return pad + kk + ":\n" + toYAML(v, indent + 1);
+      if (vt === "array" && v.length > 0) return pad + kk + ":\n" + toYAML(v, indent + 1);
+      if ((vt === "object" && Object.keys(v).length === 0)) return pad + kk + ": {}";
+      if (vt === "array" && v.length === 0) return pad + kk + ": []";
+      return pad + kk + ": " + yamlScalar(v);
+    }).join("\n");
+  }
+  if (t === "array") {
+    if (value.length === 0) return pad + "[]";
+    return value.map((v) => {
+      const vt = typeOf(v);
+      if (vt === "object" && Object.keys(v).length > 0) {
+        const block = toYAML(v, indent + 1);
+        // place first line inline after "- "
+        const lines = block.split("\n");
+        const firstTrim = lines[0].replace(/^ +/, "");
+        const rest = lines.slice(1).join("\n");
+        return pad + "- " + firstTrim + (rest ? "\n" + rest : "");
+      }
+      if (vt === "array" && v.length > 0) return pad + "-\n" + toYAML(v, indent + 1);
+      return pad + "- " + yamlScalar(v);
+    }).join("\n");
+  }
+  return pad + yamlScalar(value);
+}
+function yamlKey(k) {
+  if (/^[A-Za-z0-9_][A-Za-z0-9_\-]*$/.test(k)) return k;
+  return JSON.stringify(k);
+}
+function yamlScalar(v) {
+  const t = typeOf(v);
+  if (t === "null") return "null";
+  if (t === "boolean") return v ? "true" : "false";
+  if (t === "number") return String(v);
+  // string
+  const s = String(v);
+  if (s === "") return '""';
+  // quote if it could be misread as another type or has special chars
+  if (/[:#\-?\[\]{}&*!|>'"%@`,]/.test(s) || /^\s|\s$/.test(s) || /^(true|false|null|~|yes|no|on|off)$/i.test(s) || /^[\d.+-]/.test(s) || s.indexOf("\n") >= 0) {
+    return JSON.stringify(s);
+  }
+  return s;
+}
+
+/* --- CSV --- */
+function toCSV(value) {
+  if (!Array.isArray(value)) {
+    return { error: "CSV needs a top-level array of objects. This input is a " + typeOf(value) + ". Wrap it in an array, or pick the array field first." };
+  }
+  if (value.length === 0) return { csv: "", note: "Empty array, nothing to convert." };
+  // collect columns from all rows (union, first-seen order)
+  const cols = [];
+  const colSet = new Set();
+  let nonFlat = false;
+  for (const row of value) {
+    if (typeOf(row) !== "object") {
+      return { error: "CSV needs an array of objects. Element is a " + typeOf(row) + "." };
+    }
+    for (const k of Object.keys(row)) {
+      const vt = typeOf(row[k]);
+      if (vt === "object" || vt === "array") nonFlat = true;
+      if (!colSet.has(k)) { colSet.add(k); cols.push(k); }
+    }
+  }
+  const escCell = (v) => {
+    if (v === undefined || v === null) return "";
+    let s = typeof v === "object" ? JSON.stringify(v) : String(v);
+    if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  };
+  const lines = [cols.map(escCell).join(",")];
+  for (const row of value) {
+    lines.push(cols.map((c) => escCell(row[c])).join(","));
+  }
+  const result = { csv: lines.join("\r\n") };
+  if (nonFlat) result.note = "Some values are nested objects or arrays. They were serialized as JSON strings inside their cells. CSV fits flat objects best.";
+  return result;
+}
+
+/* --- TypeScript interface --- */
+function toTS(value) {
+  const interfaces = [];
+  const seen = new Map();
+  let counter = 0;
+
+  function pascal(name) {
+    const cleaned = name.replace(/[^A-Za-z0-9]/g, " ").replace(/\s+(.)/g, (_, c) => c.toUpperCase()).replace(/\s/g, "");
+    const out = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    return /^[A-Za-z]/.test(out) ? out : "I" + out;
+  }
+  function singular(name) { return name.endsWith("s") && name.length > 1 ? name.slice(0, -1) : name; }
+
+  function tsType(v, nameHint) {
+    const t = typeOf(v);
+    if (t === "null") return "null";
+    if (t === "string") return "string";
+    if (t === "number") return "number";
+    if (t === "boolean") return "boolean";
+    if (t === "array") {
+      if (v.length === 0) return "unknown[]";
+      // unify element types
+      const elemTypes = new Set();
+      let elemObj = null;
+      for (const el of v) {
+        if (typeOf(el) === "object") { elemObj = mergeObjects(elemObj, el); }
+        else elemTypes.add(tsType(el, nameHint));
+      }
+      if (elemObj) {
+        const iname = makeInterface(elemObj, singular(nameHint || "Item"));
+        elemTypes.add(iname);
+      }
+      const arr = [...elemTypes];
+      const inner = arr.length === 1 ? arr[0] : "(" + arr.join(" | ") + ")";
+      return inner + "[]";
+    }
+    if (t === "object") {
+      return makeInterface(v, nameHint || "Object");
+    }
+    return "unknown";
+  }
+
+  function mergeObjects(acc, obj) {
+    if (!acc) return Object.assign({}, obj);
+    const merged = Object.assign({}, acc);
+    for (const k of Object.keys(obj)) merged[k] = obj[k];
+    return merged;
+  }
+
+  function makeInterface(obj, nameHint) {
+    const name = pascal(nameHint);
+    const fields = Object.keys(obj).map((k) => {
+      const childType = tsType(obj[k], k);
+      const safeKey = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(k) ? k : JSON.stringify(k);
+      return "  " + safeKey + ": " + childType + ";";
+    });
+    const body = "interface " + name + " {\n" + fields.join("\n") + "\n}";
+    // dedupe identical bodies under same name by suffixing
+    let finalName = name;
+    if (seen.has(finalName) && seen.get(finalName) !== body) {
+      counter++;
+      finalName = name + counter;
+    }
+    const rebuilt = body.replace("interface " + name + " {", "interface " + finalName + " {");
+    seen.set(finalName, rebuilt);
+    if (!interfaces.includes(finalName)) interfaces.push(finalName);
+    return finalName;
+  }
+
+  const rootType = typeOf(value);
+  if (rootType === "object") {
+    makeInterface(value, "Root");
+  } else if (rootType === "array") {
+    const t = tsType(value, "Root");
+    // produce a type alias for arrays at root
+    return orderedInterfaces() + (orderedInterfaces() ? "\n\n" : "") + "type Root = " + t + ";";
+  } else {
+    return "type Root = " + tsType(value, "Root") + ";";
+  }
+
+  function orderedInterfaces() {
+    return interfaces.map((n) => seen.get(n)).join("\n\n");
+  }
+  return orderedInterfaces();
+}
+
+function runConvert() {
+  clearBanner("conv-status");
+  $("conv-output-sec").style.display = "none";
+  const raw = $("conv-input").value;
+  if (!raw.trim()) { banner("conv-status", "info", "Paste some JSON above to convert it."); return; }
+  let parsed;
+  try { parsed = parseJSON(raw, true); }
+  catch (e) { showParseError("conv-status", raw, e); return; }
+
+  const target = convTarget();
+  let out = "", title = "Output", note = "";
+  if (target === "yaml") {
+    out = toYAML(parsed.value, 0);
+    title = "YAML";
+  } else if (target === "csv") {
+    const r = toCSV(parsed.value);
+    if (r.error) { banner("conv-status", "warn", "<b>Cannot make CSV.</b> " + esc(r.error)); return; }
+    out = r.csv;
+    note = r.note || "";
+    title = "CSV";
+  } else if (target === "ts") {
+    out = toTS(parsed.value);
+    title = "TypeScript";
+  }
+  $("conv-output").textContent = out;
+  $("conv-output-title").textContent = title;
+  $("conv-output-sec").style.display = "block";
+  if (note) banner("conv-status", "warn", "<b>Converted with a caveat.</b> " + esc(note));
+  else banner("conv-status", "ok", "<b>Converted to " + title + ".</b>");
+}
+$("conv-run").addEventListener("click", runConvert);
+$("conv-copy").addEventListener("click", () => copyText($("conv-output").textContent));
+$("conv-clear").addEventListener("click", () => {
+  $("conv-input").value = ""; clearBanner("conv-status"); $("conv-output-sec").style.display = "none";
+});
+
+/* ====================================================================
+   SAMPLE DATA
+   ==================================================================== */
+const SAMPLE = {
+  store: {
+    book: [
+      { category: "reference", author: "Nigel Rees", title: "Sayings of the Century", price: 8.95 },
+      { category: "fiction", author: "Evelyn Waugh", title: "Sword of Honour", price: 12.99 },
+      { category: "fiction", author: "Herman Melville", title: "Moby Dick", isbn: "0-553-21311-3", price: 8.99 },
+      { category: "fiction", author: "J. R. R. Tolkien", title: "The Lord of the Rings", isbn: "0-395-19395-8", price: 22.99 }
+    ],
+    bicycle: { color: "red", price: 19.95 }
+  },
+  expensive: 10
+};
+const SAMPLE_FLAT = [
+  { id: 1, name: "Ada Lovelace", role: "engineer", active: true },
+  { id: 2, name: "Alan Turing", role: "researcher", active: false },
+  { id: 3, name: "Grace Hopper", role: "engineer, admiral", active: true }
+];
+const sampleStr = JSON.stringify(SAMPLE, null, 2);
+
+$("fmt-sample").addEventListener("click", () => { $("fmt-input").value = sampleStr; runFormat(false); });
+$("tree-sample").addEventListener("click", () => { $("tree-input").value = sampleStr; runTree(); });
+$("query-sample").addEventListener("click", () => { $("query-input").value = sampleStr; $("query-path").value = "$..author"; runQuery(); });
+$("conv-sample").addEventListener("click", () => {
+  $("conv-input").value = convTarget() === "csv" ? JSON.stringify(SAMPLE_FLAT, null, 2) : sampleStr;
+  runConvert();
+});
+$("diff-sample").addEventListener("click", () => {
+  $("diff-a").value = JSON.stringify({ name: "service", version: 1, tags: ["a", "b"], owner: { team: "core" } }, null, 2);
+  $("diff-b").value = JSON.stringify({ name: "service", version: 2, tags: ["a", "c"], region: "us-east" }, null, 2);
+  runDiff();
+});
+</script>
+</body>
+</html>
