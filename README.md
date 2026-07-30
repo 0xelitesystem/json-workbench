@@ -6,7 +6,7 @@ Format, validate, explore, query, diff, and convert JSON entirely in your browse
 
 ## What it does
 
-- **Format and validate.** Pretty-print with a 2-space, 4-space, or tab indent, or minify to one line. Invalid JSON gets a precise error with line and column and a highlighted snippet around the bad character. Optional tolerant mode strips trailing commas and comments and tells you it did.
+- **Format and validate.** Pretty-print with a 2-space, 4-space, or tab indent, or minify to one line. Invalid JSON gets the browser parser's message, and, whenever the browser reports a character position, the line, the column, and a highlighted snippet around the bad character. Optional tolerant mode strips trailing commas and comments and tells you it did.
 - **Tree view.** A collapsible, expandable tree of the parsed document with type-colored values and array or object counts on every node. It lazy-collapses deep nodes and caps very large documents so the tab never freezes.
 - **Query.** A JSONPath input that updates live. Supports root, dot and bracket keys, indices, wildcards, recursive descent, slices, unions, and basic filters like `[?(@.price<10)]`. This is a useful JSONPath subset, not full jq, and the UI says so.
 - **Diff.** Paste two documents and get a structural diff: keys added, removed, or changed, with a color-coded list and a summary count. Object keys are compared without regard to order; arrays are compared by index.

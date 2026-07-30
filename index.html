@@ -813,6 +813,20 @@ function errorSnippet(src, loc) {
   return (start > 0 ? "..." : "") + before + '<span class="error-mark">' + at + "</span>" + after + (end < src.length ? "..." : "");
 }
 
+/* Report a failure that happened after parsing, so a tab never goes silent. */
+function showRunError(statusId, err) {
+  const deep = err instanceof RangeError || /call stack|Invalid string length/i.test(err.message || "");
+  const lead = deep
+    ? "<b>Too big to render.</b> This document is nested too deeply or too large for the browser to process in one pass. "
+    : "<b>Something went wrong.</b> ";
+  banner(statusId, "err", lead + esc(err.message || String(err)));
+}
+
+/* Byte length of a string as UTF-8, which is what a file on disk would be. */
+function byteLength(s) {
+  try { return new TextEncoder().encode(s).length; } catch (e) { return s.length; }
+}
+
 function showParseError(statusId, raw, err) {
   let where = "";
   if (err.loc && err.loc.line) {
@@ -855,12 +869,17 @@ function runFormat(minify) {
     return;
   }
   let out;
-  if (minify) {
-    out = JSON.stringify(parsed.value);
-    $("fmt-output-title").textContent = "Minified (" + out.length + " bytes)";
-  } else {
-    out = JSON.stringify(parsed.value, null, indentValue(indentSeg));
-    $("fmt-output-title").textContent = "Pretty-printed";
+  try {
+    if (minify) {
+      out = JSON.stringify(parsed.value);
+      $("fmt-output-title").textContent = "Minified (" + byteLength(out) + " bytes)";
+    } else {
+      out = JSON.stringify(parsed.value, null, indentValue(indentSeg));
+      $("fmt-output-title").textContent = "Pretty-printed";
+    }
+  } catch (e) {
+    showRunError("fmt-status", e);
+    return;
   }
   $("fmt-output").textContent = out;
   $("fmt-output-sec").style.display = "block";
@@ -999,7 +1018,9 @@ function runTree() {
   const container = $("tree-output");
   container.textContent = "";
   treeNodeCount++;
-  const dom = buildTreeDOM(parsed.value, null, true, 0);
+  let dom;
+  try { dom = buildTreeDOM(parsed.value, null, true, 0); }
+  catch (e) { showRunError("tree-status", e); return; }
   container.appendChild(dom);
   $("tree-output-sec").style.display = "block";
   if (treeCapped) {
@@ -1069,7 +1090,8 @@ function tokenizePath(path) {
         }
         // read a name
         let name = "";
-        while (i < n && /[A-Za-z0-9_\-$]/.test(p[i])) { name += p[i]; i++; }
+        if (p[i] === "*") { name = "*"; i++; }
+        else while (i < n && /[A-Za-z0-9_\-$]/.test(p[i])) { name += p[i]; i++; }
         if (name === "*") { tokens.push({ type: "descend" }, { type: "wildcard" }); }
         else if (name === "") { tokens.push({ type: "descend" }); }
         else { tokens.push({ type: "descend" }, { type: "key", key: name }); }
@@ -1077,7 +1099,8 @@ function tokenizePath(path) {
       }
       i++;
       let name = "";
-      while (i < n && /[A-Za-z0-9_\-$]/.test(p[i])) { name += p[i]; i++; }
+      if (p[i] === "*") { name = "*"; i++; }
+      else while (i < n && /[A-Za-z0-9_\-$]/.test(p[i])) { name += p[i]; i++; }
       if (name === "*") tokens.push({ type: "wildcard" });
       else if (name === "") throw new Error("Expected a key after '.'");
       else tokens.push({ type: "key", key: name });
@@ -1170,9 +1193,16 @@ function parseFilter(expr) {
   // supports: @.field OP value  | @['field'] OP value | @.field (existence)
   const ops = ["==", "!=", "<=", ">=", "<", ">"];
   let op = null, idx = -1;
-  for (const o of ops) {
-    const k = expr.indexOf(o);
-    if (k >= 0) { op = o; idx = k; break; }
+  // scan left to right, skipping quoted operands, so an operator inside a
+  // string literal is not mistaken for the comparison operator
+  let inQ = false, qCh = "";
+  for (let k = 0; k < expr.length && op === null; k++) {
+    const ch = expr[k];
+    if (inQ) { if (ch === qCh && expr[k - 1] !== "\\") inQ = false; continue; }
+    if (ch === "'" || ch === '"') { inQ = true; qCh = ch; continue; }
+    for (const o of ops) {
+      if (expr.slice(k, k + o.length) === o) { op = o; idx = k; break; }
+    }
   }
   if (op === null) {
     return { lhs: parseFilterRef(expr.trim()), op: "exists", rhs: null };
@@ -1218,6 +1248,8 @@ function refValue(item, keys) {
   let v = item;
   for (const k of keys) {
     if (v == null) return undefined;
+    // own properties only: @.constructor must not match every object
+    if (!Object.prototype.hasOwnProperty.call(v, k)) return undefined;
     v = v[k];
   }
   return v;
@@ -1347,18 +1379,20 @@ function runQuery() {
     return;
   }
   const cap = 500;
-  unique.slice(0, cap).forEach((r) => {
-    const wrap = document.createElement("div");
-    wrap.className = "qresult";
-    const p = document.createElement("div");
-    p.className = "qpath";
-    p.textContent = r.path;
-    const pre = document.createElement("pre");
-    pre.textContent = JSON.stringify(r.value, null, 2);
-    wrap.appendChild(p);
-    wrap.appendChild(pre);
-    outEl.appendChild(wrap);
-  });
+  try {
+    unique.slice(0, cap).forEach((r) => {
+      const wrap = document.createElement("div");
+      wrap.className = "qresult";
+      const p = document.createElement("div");
+      p.className = "qpath";
+      p.textContent = r.path;
+      const pre = document.createElement("pre");
+      pre.textContent = JSON.stringify(r.value, null, 2);
+      wrap.appendChild(p);
+      wrap.appendChild(pre);
+      outEl.appendChild(wrap);
+    });
+  } catch (e) { showRunError("query-status", e); return; }
   $("query-count").textContent = unique.length + " match" + (unique.length === 1 ? "" : "es") + (unique.length > cap ? " (showing first " + cap + ")" : "");
   $("query-output-sec").style.display = "block";
   banner("query-status", "ok", "<b>" + unique.length + " match" + (unique.length === 1 ? "" : "es") + ".</b>");
@@ -1452,7 +1486,8 @@ function runDiff() {
   catch (e) { banner("diff-status", "err", "<b>Right side invalid.</b> " + esc(e.message)); return; }
 
   const changes = [];
-  diffNodes(A, B, "$", changes);
+  try { diffNodes(A, B, "$", changes); }
+  catch (e) { showRunError("diff-status", e); return; }
 
   const counts = { add: 0, del: 0, chg: 0 };
   changes.forEach((c) => counts[c.kind]++);
@@ -1529,6 +1564,8 @@ function toYAML(value, indent) {
         return pad + "- " + firstTrim + (rest ? "\n" + rest : "");
       }
       if (vt === "array" && v.length > 0) return pad + "-\n" + toYAML(v, indent + 1);
+      if (vt === "object") return pad + "- {}";
+      if (vt === "array") return pad + "- []";
       return pad + "- " + yamlScalar(v);
     }).join("\n");
   }
@@ -1547,7 +1584,7 @@ function yamlScalar(v) {
   const s = String(v);
   if (s === "") return '""';
   // quote if it could be misread as another type or has special chars
-  if (/[:#\-?\[\]{}&*!|>'"%@`,]/.test(s) || /^\s|\s$/.test(s) || /^(true|false|null|~|yes|no|on|off)$/i.test(s) || /^[\d.+-]/.test(s) || s.indexOf("\n") >= 0) {
+  if (/[:#\-?\[\]{}&*!|>'"%@`,]/.test(s) || /^\s|\s$/.test(s) || /^(true|false|null|~|yes|no|on|off)$/i.test(s) || /^[\d.+-]/.test(s) || /[\u0000-\u001f\u007f]/.test(s)) {
     return JSON.stringify(s);
   }
   return s;
@@ -1580,8 +1617,9 @@ function toCSV(value) {
     return s;
   };
   const lines = [cols.map(escCell).join(",")];
+  const cell = (row, c) => (Object.prototype.hasOwnProperty.call(row, c) ? row[c] : undefined);
   for (const row of value) {
-    lines.push(cols.map((c) => escCell(row[c])).join(","));
+    lines.push(cols.map((c) => escCell(cell(row, c))).join(","));
   }
   const result = { csv: lines.join("\r\n") };
   if (nonFlat) result.note = "Some values are nested objects or arrays. They were serialized as JSON strings inside their cells. CSV fits flat objects best.";
@@ -1631,8 +1669,10 @@ function toTS(value) {
   }
 
   function mergeObjects(acc, obj) {
-    if (!acc) return Object.assign({}, obj);
-    const merged = Object.assign({}, acc);
+    // null prototype: a key literally named __proto__ must land as an own
+    // property instead of tripping the Object.prototype setter and vanishing.
+    const merged = Object.create(null);
+    if (acc) for (const k of Object.keys(acc)) merged[k] = acc[k];
     for (const k of Object.keys(obj)) merged[k] = obj[k];
     return merged;
   }
@@ -1661,7 +1701,9 @@ function toTS(value) {
   if (rootType === "object") {
     makeInterface(value, "Root");
   } else if (rootType === "array") {
-    const t = tsType(value, "Root");
+    // element interfaces must not be named Root: the alias below already owns
+    // that name, and declaring both makes the output fail to compile.
+    const t = tsType(value, "RootItem");
     // produce a type alias for arrays at root
     return orderedInterfaces() + (orderedInterfaces() ? "\n\n" : "") + "type Root = " + t + ";";
   } else {
@@ -1685,18 +1727,23 @@ function runConvert() {
 
   const target = convTarget();
   let out = "", title = "Output", note = "";
-  if (target === "yaml") {
-    out = toYAML(parsed.value, 0);
-    title = "YAML";
-  } else if (target === "csv") {
-    const r = toCSV(parsed.value);
-    if (r.error) { banner("conv-status", "warn", "<b>Cannot make CSV.</b> " + esc(r.error)); return; }
-    out = r.csv;
-    note = r.note || "";
-    title = "CSV";
-  } else if (target === "ts") {
-    out = toTS(parsed.value);
-    title = "TypeScript";
+  try {
+    if (target === "yaml") {
+      out = toYAML(parsed.value, 0);
+      title = "YAML";
+    } else if (target === "csv") {
+      const r = toCSV(parsed.value);
+      if (r.error) { banner("conv-status", "warn", "<b>Cannot make CSV.</b> " + esc(r.error)); return; }
+      out = r.csv;
+      note = r.note || "";
+      title = "CSV";
+    } else if (target === "ts") {
+      out = toTS(parsed.value);
+      title = "TypeScript";
+    }
+  } catch (e) {
+    showRunError("conv-status", e);
+    return;
   }
   $("conv-output").textContent = out;
   $("conv-output-title").textContent = title;
